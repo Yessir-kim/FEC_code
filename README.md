@@ -1,4 +1,4 @@
-# reed_solomon
+# FEC
 
 **Collection of FEC code for testing**
 
