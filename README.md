@@ -4,7 +4,7 @@
 
 1. Reed_solomon code using c implementation
 
-		build : go build -o fec_go fec.go 
+		build : go build -o fec_go fec_rs.go 
 
   		execution : ./fec_go <options> <inputFile>
 
@@ -16,18 +16,28 @@
 2. Simple xor code using c implementation 
   
 		Set SIMD value to value other than 1
-		--> #define SIMD 0 
+		--> #define SIMD 0 in fec_xor.go 
   
-		build :
+		build : go build -o fec_go fec_xor.go
   
-		execution :
+		execution : ./fec_go <options> <inputFile>
+
+		example : ./fec_go -r 32 -c 1024 100m.txt
+			-r : Size of row
+			-c : Size of column
+			--> block size = row * col
   
   
 3. SIMD xor code using c implementation
 
 		Set SIMD value to 1
-  		--> #define SIMD 1
+  		--> #define SIMD 1 in fec_xor.go
   
-  		build :
+  		build : go build -o fec_go fec_xor.go
   
-  		execution :
+  		execution : ./fec_go <options> <inputFile>
+
+		example : ./fec_go -r 32 -c 1024 100m.txt
+			-r : Size of row
+			-c : Size of column
+			--> block size = row * col

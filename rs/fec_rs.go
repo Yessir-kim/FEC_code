@@ -685,8 +685,19 @@ int reed_solomon_encode2(reed_solomon* rs, unsigned char** shards, int nr_shards
     data_blocks = shards;
     fec_blocks = &shards[(i*ds)];
 
+		fprintf(stderr, "%d %d %d \n", ds, ps, ss) ;
+
+		clock_t start, end ;
+
     for(i = 0; i < nr_shards; i += ss) {
+				start = clock() ;
+
         reed_solomon_encode(rs, data_blocks, fec_blocks, block_size);
+
+				end = clock() ;
+
+				fprintf(stderr, "reed_solomon_encode execution time: %f\n", (double)(end - start)/CLOCKS_PER_SEC) ;
+
         data_blocks += ds;
         fec_blocks += ps;
     }
@@ -731,6 +742,10 @@ int reed_solomon_reconstruct(reed_solomon* rs,
             }
 
             if(dn == pn) {
+								clock_t start, end ;
+
+								start = clock() ;
+
                 reed_solomon_decode(rs
                         , data_blocks
                         , block_size
@@ -738,6 +753,10 @@ int reed_solomon_reconstruct(reed_solomon* rs,
                         , fec_block_nos
                         , erased_blocks
                         , dn);
+
+								end = clock() ;
+
+								fprintf(stderr, "reed_solomon_decode execution time: %f\n", (double)(end - start)/CLOCKS_PER_SEC) ;
             } else {
                 err = -1;
             }
@@ -800,15 +819,7 @@ unsigned char** xorENC(reed_solomon* rs, info* inf) {
 			data_blocks[i] = inf->data + i * inf->blockSize ;
 	  }
 
-		clock_t start, end ;
-
-		start = clock() ;
-
 		reed_solomon_encode2(rs, data_blocks, inf->nrBlocks + inf->nrFecBlocks, inf->blockSize) ;
-
-		end = clock() ;
-
-		fprintf(stderr, "reed_solomon_encode2 execution time: %f\n", (double)(end - start)/CLOCKS_PER_SEC) ;
 
 		return data_blocks ;
 }
@@ -832,15 +843,7 @@ unsigned char* sim(reed_solomon* rs, info* inf) {
 }
 
 void xorDEC(reed_solomon* rs, info* inf, unsigned char* zilch, unsigned char** data_blocks) {
-		clock_t start, end ;
-
-		start = clock() ;
-
 		reed_solomon_reconstruct(rs, data_blocks, zilch, inf->nrShards, inf->blockSize);
-
-		end = clock() ;
-
-		fprintf(stderr, "reed_solomon_reconstruct execution time: %f\n", (double)(end - start)/CLOCKS_PER_SEC) ;
 }
 */
 import "C"
@@ -850,6 +853,7 @@ import (
 	"fmt"
 	"os"
 	"time"
+	"unsafe"
 )
 
 var dataShards = flag.Int("d", 10, "Number of shards to split the data into, must be below 257")
@@ -902,7 +906,7 @@ func main() {
 
 	C.xorDEC(rs, info, loss, dataBlocks)
 
-	// C.write(1, unsafe.Pointer(info.data), C.ulong(info.size))
+	C.write(1, unsafe.Pointer(info.data), C.ulong(info.size))
 }
 
 func checkErr(err error) {
